@@ -42,22 +42,25 @@ def signal_handler(signal, frame):
 # cmd-line options
 
 long_options = [
-  "configfile=",	# config file
-  "config=",  		# config field
-  "rootdir=", 		# root of tree containing tests (default: .)
-  "summary-file=",      # file in which to save the (human-readable) summary
-  "no-print-summary=",  # should we print the summary?
-  "only=",		# just this test (can be give multiple --only= flags)
-  "way=",		# just this way
-  "skipway=",		# skip this way
-  "threads=",           # threads to run simultaneously
-  "check-files-written", # check files aren't written by multiple tests
-  "verbose=",          # verbose (0,1,2 so far)
-  "skip-perf-tests",       # skip performance tests
+  "configfile=",          # config file
+  "config=",              # config field
+  "rootdir=",             # root of tree containing tests (default: .)
+  "summary-file=",        # file in which to save the (human-readable) summary
+  "no-print-summary=",    # should we print the summary?
+  "only=",                # just this test (can be give multiple --only= flags)
+  "way=",                 # just this way
+  "skipway=",	          # skip this way
+  "threads=",             # threads to run simultaneously
+  "check-files-written",  # check files aren't written by multiple tests
+  "verbose=",             # verbose (0,1,2 so far)
+  "skip-perf-tests",      # skip performance tests
+  "only-perf-tests",       # Only do performance tests
+  "use-git-notes",        # use git notes to store metrics. NOTE: This is expected to become the default and will eventually be taken out.
+  "TEST_ENV=",            # Override default chosen test-env.
   ]
 
 opts, args = getopt.getopt(sys.argv[1:], "e:", long_options)
-       
+
 for opt,arg in opts:
     if opt == '--configfile':
         exec(open(arg).read())
@@ -110,11 +113,20 @@ for opt,arg in opts:
     if opt == '--skip-perf-tests':
         config.skip_perf_tests = True
 
+    if opt == '--only-perf-tests':
+        config.only_perf_tests = True
+
+    if opt == '--use-git-notes':
+        config.use_git_notes = True
+
     if opt == '--verbose':
         if arg not in ["0","1","2","3","4","5"]:
             sys.stderr.write("ERROR: requested verbosity %s not supported, use 0,1,2,3,4 or 5" % arg)
             sys.exit(1)
         config.verbose = int(arg)
+
+    if opt == '--TEST_ENV':
+        config.TEST_ENV = arg
 
 
 config.cygwin = False
