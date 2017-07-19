@@ -54,9 +54,9 @@ long_options = [
   "check-files-written",  # check files aren't written by multiple tests
   "verbose=",             # verbose (0,1,2 so far)
   "skip-perf-tests",      # skip performance tests
-  "only-perf-tests",       # Only do performance tests
+  "only-perf-tests",      # Only do performance tests
   "use-git-notes",        # use git notes to store metrics. NOTE: This is expected to become the default and will eventually be taken out.
-  "TEST_ENV=",            # Override default chosen test-env.
+  "test-env=",            # Override default chosen test-env.
   ]
 
 opts, args = getopt.getopt(sys.argv[1:], "e:", long_options)
@@ -125,8 +125,8 @@ for opt,arg in opts:
             sys.exit(1)
         config.verbose = int(arg)
 
-    if opt == '--TEST_ENV':
-        config.TEST_ENV = arg
+    if opt == '--test-env':
+        config.test_env = arg
 
 
 config.cygwin = False
@@ -338,6 +338,11 @@ else:
 
     summary(t, sys.stdout, config.no_print_summary)
 
+    # This here is loading up all of the git notes into memory.
+    # It's most likely in the wrong spot and I haven't fully fleshed out
+    # where exactly I'm putting this and how I'm refactoring the performance
+    # test running logic.
+    # Currently this is useful for debugging, at least.
     if config.use_git_notes:
             note = subprocess.check_output(["git","notes","--ref=perf","append","-m", "\n".join(config.accumulate_metrics)])
             parse_git_notes('perf') # Should this be hardcoded? Most likely not...
