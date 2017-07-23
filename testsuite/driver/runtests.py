@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+import argparse
 import signal
 import sys
 import os
@@ -41,6 +42,24 @@ def signal_handler(signal, frame):
 # -----------------------------------------------------------------------------
 # cmd-line options
 
+# argparse implementation
+# parser = argparse.ArgumentParser()
+# parser.add_argument("configfile=", help="config file")
+# parser.add_argument("config=", help="config field")
+# parser.add_argument("rootdir=", help="root of tree containing tests (default: .)")
+# parser.add_argument("summary-file=", help="file in which to save the (human-readable) summary")
+# parser.add_argument("no-print-summary=", help="should we print the summary?")
+# parser.add_argument("only=", help="just this test (can be give multiple --only= flags)")
+# parser.add_argument("way=", help="just this way")
+# parser.add_argument("skipway=", help="skip this way")
+# parser.add_argument("threads=", help="threads to run simultaneously")
+# parser.add_argument("check-files-written", help="check files aren't written by multiple tests")
+# parser.add_argument("verbose=", help="verbose (0,1,2 so far)")
+# parser.add_argument("skip-perf-tests", help="skip performance tests")
+# parser.add_argument("only-perf-tests", help="Only do performance tests")
+# parser.add_argument("use-git-notes", help="use git notes to store metrics. NOTE: This is expected to become the default and will eventually be taken out.")
+# parser.add_argument("test-env=", help="Override default chosen test-env.")
+
 long_options = [
   "configfile=",          # config file
   "config=",              # config field
@@ -60,6 +79,11 @@ long_options = [
   ]
 
 opts, args = getopt.getopt(sys.argv[1:], "e:", long_options)
+# argparse implementation
+# aargs = parser.parse_args()
+
+# if aargs.configfile:
+#         exec(open(aarg.configfile))
 
 for opt,arg in opts:
     if opt == '--configfile':
