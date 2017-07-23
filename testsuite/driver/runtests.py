@@ -58,6 +58,9 @@ parser.add_argument("--check-files-written", help="check files aren't written by
 parser.add_argument("--verbose", type=int, choices=[0,1,2,3,4,5], help="verbose (Values 0 through 5 accepted)")
 parser.add_argument("--skip-perf-tests", action="store_true", help="skip performance tests")
 parser.add_argument("--junit", type=argparse.FileType('wb'), help="output testsuite summary in JUnit format")
+parser.add_argument("only-perf-tests", help="Only do performance tests")
+parser.add_argument("use-git-notes", help="use git notes to store metrics. NOTE: This is expected to become the default and will eventually be taken out.")
+parser.add_argument("test-env=", help="Override default chosen test-env.")
 
 args = parser.parse_args()
 
