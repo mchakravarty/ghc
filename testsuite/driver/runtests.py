@@ -6,7 +6,6 @@
 
 from __future__ import print_function
 
-import argparse
 import signal
 import sys
 import os
@@ -315,15 +314,6 @@ else:
             note = subprocess.check_output(["git","notes","--ref=perf","append","-m", "\n".join(config.accumulate_metrics)])
             # v-- This is in a nonsensical area. It should be happening before all of the tests are even run.
             # parse_git_notes('perf') # Should it even be happening in the test-driver logic anymore?
-
-    # This here is loading up all of the git notes into memory.
-    # It's most likely in the wrong spot and I haven't fully fleshed out
-    # where exactly I'm putting this and how I'm refactoring the performance
-    # test running logic.
-    # Currently this is useful for debugging, at least.
-    if config.use_git_notes:
-            note = subprocess.check_output(["git","notes","--ref=perf","append","-m", "\n".join(config.accumulate_metrics)])
-            parse_git_notes('perf') # Should this be hardcoded? Most likely not...
 
     if config.summary_file:
         with open(config.summary_file, 'w') as file:
