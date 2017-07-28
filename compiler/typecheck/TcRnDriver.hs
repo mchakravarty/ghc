@@ -1777,14 +1777,19 @@ runTcInteractive hsc_env thing_inside
                       vcat (map ppr [ local_gres | gres <- occEnvElts (ic_rn_gbl_env icxt)
                                                  , let local_gres = filter isLocalGRE gres
                                                  , not (null local_gres) ]) ]
-       ; let getOrphans m = fmap (\iface -> mi_module iface
+
+       ; let getOrphans m mb_pkg = fmap (\iface -> mi_module iface
                                           : dep_orphs (mi_deps iface))
                                  (loadSrcInterface (text "runTcInteractive") m
-                                                   False Nothing)
+                                                   False mb_pkg)
+
        ; orphs <- fmap concat . forM (ic_imports icxt) $ \i ->
             case i of
-                IIModule n -> getOrphans n
-                IIDecl i -> getOrphans (unLoc (ideclName i))
+                IIModule n -> getOrphans n Nothing
+                IIDecl i ->
+                  let mb_pkg = sl_fs <$> ideclPkgQual i in
+                  getOrphans (unLoc (ideclName i)) mb_pkg
+
        ; let imports = emptyImportAvails {
                             imp_orphs = orphs
                         }
@@ -2186,9 +2191,9 @@ tcRnExpr hsc_env mode rdr_expr
                   else return expr_ty } ;
 
     -- Generalise
-    ((qtvs, dicts, _), lie_top) <- captureTopConstraints $
-                                   {-# SCC "simplifyInfer" #-}
-                                   simplifyInfer tclvl
+    ((qtvs, dicts, _, _), lie_top) <- captureTopConstraints $
+                                      {-# SCC "simplifyInfer" #-}
+                                      simplifyInfer tclvl
                                                  infer_mode
                                                  []    {- No sig vars -}
                                                  [(fresh_it, res_ty)]

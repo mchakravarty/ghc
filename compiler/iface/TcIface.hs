@@ -893,7 +893,7 @@ tcIfaceDataCons tycon_name tycon tc_tybinders if_cons
                                 ; mkNewTyConRhs tycon_name tycon data_con }
   where
     univ_tv_bndrs :: [TyVarBinder]
-    univ_tv_bndrs = mkDataConUnivTyVarBinders tc_tybinders
+    univ_tv_bndrs = tyConTyVarBinders tc_tybinders
 
     tc_con_decl (IfCon { ifConInfix = is_infix,
                          ifConExTvs = ex_bndrs,
@@ -1321,6 +1321,7 @@ tcIfaceCo = go
     go (IfaceForAllCo tv k c)  = do { k' <- go k
                                       ; bindIfaceTyVar tv $ \ tv' ->
                                         ForAllCo tv' k' <$> go c }
+    go (IfaceFreeCoVar c)        = pprPanic "tcIfaceCo:IfaceFreeCoVar" (ppr c)
     go (IfaceCoVarCo n)          = CoVarCo <$> go_var n
     go (IfaceAxiomInstCo n i cs) = AxiomInstCo <$> tcIfaceCoAxiom n <*> pure i <*> mapM go cs
     go (IfaceUnivCo p r t1 t2)   = UnivCo <$> tcIfaceUnivCoProv p <*> pure r

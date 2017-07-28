@@ -4,9 +4,12 @@ Foreign function interface (FFI)
 ================================
 
 .. index::
-   single: -XForeignFunctionInterface
    single: Foreign function interface
    single: interfacing with native code
+
+.. ghc-flag:: -XForeignFunctionInterface
+
+    Allow use of the Haskell foreign function interface.
 
 GHC (mostly) conforms to the Haskell Foreign Function Interface, whose
 definition is part of the Haskell Report on
@@ -20,8 +23,8 @@ Haskell 2010 Report. These extensions are described in :ref:`ffi-ghcexts`, but
 please note that programs using these features are not portable. Hence, these
 features should be avoided where possible.
 
-The FFI libraries are documented in the accompanying library
-documentation; see for example the :base-ref:`Foreign <Foreign.html>` module.
+The FFI libraries are documented in the accompanying  library
+documentation; see for example the :base-ref:`Foreign.` module.
 
 GHC differences to the FFI Chapter
 ----------------------------------
@@ -334,13 +337,19 @@ reliably re-initialise after this has happened; see :ref:`infelicities-ffi`.
     don't forget the flag :ghc-flag:`-no-hs-main`, otherwise GHC
     will try to link to the ``Main`` Haskell module.
 
+.. note::
+    On Windows hs_init treats argv as UTF8-encoded. Passing other encodings
+    might lead to unexpected results. Passing NULL as argv is valid but can
+    lead to <unknown> showing up in error messages instead of the name of the
+    executable.
+
 To use ``+RTS`` flags with ``hs_init()``, we have to modify the example
-slightly. By default, GHC's RTS will only accept "safe" ``+RTS`` flags
-(see :ref:`options-linker`), and the :ghc-flag:`-rtsopts`
-link-time flag overrides this. However, :ghc-flag:`-rtsopts` has no effect when
-:ghc-flag:`-no-hs-main` is in use (and the same goes for :ghc-flag:`-with-rtsopts`). To
-set these options we have to call a GHC-specific API instead of
-``hs_init()``:
+slightly. By default, GHC's RTS will only accept "safe" ``+RTS`` flags (see
+:ref:`options-linker`), and the :ghc-flag:`-rtsopts[=⟨none|some|all⟩]`
+link-time flag overrides this. However, :ghc-flag:`-rtsopts[=⟨none|some|all⟩]`
+has no effect when :ghc-flag:`-no-hs-main` is in use (and the same goes for
+:ghc-flag:`-with-rtsopts=⟨opts⟩`). To set these options we have to call a
+GHC-specific API instead of ``hs_init()``:
 
 .. code-block:: c
 
@@ -548,7 +557,7 @@ single Haskell thread, and possibly also use a bound thread (see
 
 Note that foreign calls made by different Haskell threads may execute in
 *parallel*, even when the ``+RTS -N`` flag is not being used
-(:ref:`parallel-options`). The :rts-flag:`-N` flag controls parallel
+(:ref:`parallel-options`). The :rts-flag:`-N ⟨x⟩` flag controls parallel
 execution of Haskell threads, but there may be an arbitrary number of
 foreign calls in progress at any one time, regardless of the ``+RTS -N``
 value.
@@ -578,7 +587,7 @@ where it is useful to have more control over which OS thread is used,
 for example when calling foreign code that makes use of thread-local
 state. For cases like this, we provide *bound threads*, which are
 Haskell threads tied to a particular OS thread. For information on bound
-threads, see the documentation for the :base-ref:`Control.Concurrent <Control-Concurrent.html>` module.
+threads, see the documentation for the :base-ref:`Control.Concurrent.` module.
 
 Foreign exports and multi-threading
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -166,7 +166,7 @@ module Type (
         zapTCvSubst, getTCvInScope, getTCvSubstRangeFVs,
         extendTCvInScope, extendTCvInScopeList, extendTCvInScopeSet,
         extendTCvSubst, extendCvSubst,
-        extendTvSubst, extendTvSubstBinder,
+        extendTvSubst, extendTvSubstBinderAndInScope,
         extendTvSubstList, extendTvSubstAndInScope,
         extendTvSubstWithClone,
         isInScope, composeTCvSubstEnv, composeTCvSubst, zipTyEnv, zipCoEnv,
@@ -615,8 +615,8 @@ getTyVar_maybe ty | Just ty' <- coreView ty = getTyVar_maybe ty'
                   | otherwise               = repGetTyVar_maybe ty
 
 -- | If the type is a tyvar, possibly under a cast, returns it, along
--- with the coercion. Thus, the co is :: kind tv ~R kind type
-getCastedTyVar_maybe :: Type -> Maybe (TyVar, Coercion)
+-- with the coercion. Thus, the co is :: kind tv ~N kind type
+getCastedTyVar_maybe :: Type -> Maybe (TyVar, CoercionN)
 getCastedTyVar_maybe ty | Just ty' <- coreView ty = getCastedTyVar_maybe ty'
 getCastedTyVar_maybe (CastTy (TyVarTy tv) co)     = Just (tv, co)
 getCastedTyVar_maybe (TyVarTy tv)
@@ -789,7 +789,7 @@ splitAppTys ty = split ty ty []
     split orig_ty _                     args  = (orig_ty, args)
 
 -- | Like 'splitAppTys', but doesn't look through type synonyms
-repSplitAppTys :: Type -> (Type, [Type])
+repSplitAppTys :: HasDebugCallStack => Type -> (Type, [Type])
 repSplitAppTys ty = split ty []
   where
     split (AppTy ty arg) args = split ty (arg:args)
@@ -943,7 +943,7 @@ funArgTy ty | Just ty' <- coreView ty = funArgTy ty'
 funArgTy (FunTy arg _res) = arg
 funArgTy ty               = pprPanic "funArgTy" (ppr ty)
 
-piResultTy :: Type -> Type ->  Type
+piResultTy :: HasDebugCallStack => Type -> Type ->  Type
 piResultTy ty arg = case piResultTy_maybe ty arg of
                       Just res -> res
                       Nothing  -> pprPanic "piResultTy" (ppr ty $$ ppr arg)
@@ -988,7 +988,7 @@ piResultTy_maybe ty arg
 -- so we pay attention to efficiency, especially in the special case
 -- where there are no for-alls so we are just dropping arrows from
 -- a function type/kind.
-piResultTys :: Type -> [Type] -> Type
+piResultTys :: HasDebugCallStack => Type -> [Type] -> Type
 piResultTys ty [] = ty
 piResultTys ty orig_args@(arg:args)
   | Just ty' <- coreView ty
@@ -1486,14 +1486,6 @@ isTauTy (CoercionTy _)        = False  -- Not sure about this
 %************************************************************************
 -}
 
--- | Make a named binder
-mkTyVarBinder :: ArgFlag -> Var -> TyVarBinder
-mkTyVarBinder vis var = TvBndr var vis
-
--- | Make many named binders
-mkTyVarBinders :: ArgFlag -> [TyVar] -> [TyVarBinder]
-mkTyVarBinders vis = map (mkTyVarBinder vis)
-
 -- | Make an anonymous binder
 mkAnonBinder :: Type -> TyBinder
 mkAnonBinder = Anon
@@ -1836,7 +1828,7 @@ predTypeEqRel ty
 --
 -- This is a deterministic sorting operation
 -- (that is, doesn't depend on Uniques).
-toposortTyVars :: [TyVar] -> [TyVar]
+toposortTyVars :: [TyCoVar] -> [TyCoVar]
 toposortTyVars tvs = reverse $
                      [ node_payload node | node <- topologicalSortG $
                                           graphFromEdgedVerticesOrd nodes ]

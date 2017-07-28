@@ -750,7 +750,6 @@ data DynFlags = DynFlags {
   -- ways
   ways                  :: [Way],       -- ^ Way flags from the command line
   buildTag              :: String,      -- ^ The global \"way\" (e.g. \"p\" for prof)
-  rtsBuildTag           :: String,      -- ^ The RTS \"way\"
 
   -- For object splitting
   splitInfo             :: Maybe (String,Int),
@@ -1447,11 +1446,7 @@ wayOptl :: Platform -> Way -> [String]
 wayOptl _ (WayCustom {}) = []
 wayOptl platform WayThreaded =
         case platformOS platform of
-        -- FreeBSD's default threading library is the KSE-based M:N libpthread,
-        -- which GHC has some problems with.  It's currently not clear whether
-        -- the problems are our fault or theirs, but it seems that using the
-        -- alternative 1:1 threading library libthr works around it:
-        OSFreeBSD  -> ["-lthr"]
+        OSFreeBSD  -> ["-pthread"]
         OSOpenBSD  -> ["-pthread"]
         OSNetBSD   -> ["-pthread"]
         _          -> []
@@ -1644,7 +1639,6 @@ defaultDynFlags mySettings =
         pkgState                = emptyPackageState,
         ways                    = defaultWays mySettings,
         buildTag                = mkBuildTag (defaultWays mySettings),
-        rtsBuildTag             = mkBuildTag (defaultWays mySettings),
         splitInfo               = Nothing,
         settings                = mySettings,
         -- ghc -M values
@@ -2477,8 +2471,7 @@ updateWays dflags
     = let theWays = sort $ nub $ ways dflags
       in dflags {
              ways        = theWays,
-             buildTag    = mkBuildTag (filter (not . wayRTSOnly) theWays),
-             rtsBuildTag = mkBuildTag                            theWays
+             buildTag    = mkBuildTag (filter (not . wayRTSOnly) theWays)
          }
 
 -- | Check (and potentially disable) any extensions that aren't allowed
