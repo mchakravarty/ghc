@@ -41,8 +41,9 @@ def signal_handler(signal, frame):
 # -----------------------------------------------------------------------------
 # cmd-line options
 
-parser = argparse.ArgumentParser(description="GHC's testsuite driver")
-perf_group = parser.add_mutually_exclusive_group()
+parser = argparse.ArgumentParser(description="GHC's testsuite driver",
+                                 allow_abbrev=False)
+group = parser.add_mutually_exclusive_group()
 
 parser.add_argument("-e", action='append', help="A string to execute from the command line.")
 parser.add_argument("--config-file", action="append", help="config file")
@@ -57,11 +58,12 @@ parser.add_argument("--skipway", action="append", choices=config.run_ways+config
 parser.add_argument("--threads", type=int, help="threads to run simultaneously")
 parser.add_argument("--check-files-written", help="check files aren't written by multiple tests") # NOTE: This doesn't seem to exist?
 parser.add_argument("--verbose", type=int, choices=[0,1,2,3,4,5], help="verbose (Values 0 through 5 accepted)")
-perf_group.add_argument("--skip-perf-tests", action="store_true", help="skip performance tests")
-perf_group.add_argument("--only-perf-tests", action="store_true", help="Only do performance tests")
+group.add_argument("--skip-perf-tests", action="store_true", help="skip performance tests")
+group.add_argument("--only-perf-tests", action="store_true", help="Only do performance tests")
 parser.add_argument("--junit", type=argparse.FileType('wb'), help="output testsuite summary in JUnit format")
 parser.add_argument("--use-git-notes", action="store_true", help="use git notes to store metrics. NOTE: This is expected to become the default and will eventually be taken out.")
 parser.add_argument("--test-env", default='local', help="Override default chosen test-env.")
+
 
 args = parser.parse_args()
 
@@ -111,13 +113,10 @@ if args.threads:
 if args.verbose:
     config.verbose = args.verbose
 
-# Might need to encase these in if statements.
 config.skip_perf_tests = args.skip_perf_tests
 config.only_perf_tests = args.only_perf_tests
 config.use_git_notes = args.use_git_notes
-
-if args.test_env:
-        config.test_env = args.test_env
+config.test_env = args.test_env
 
 config.cygwin = False
 config.msys = False
